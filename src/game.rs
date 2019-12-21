@@ -1,6 +1,5 @@
 
 use std::fmt::{self, Debug, Display};
-
 use termion::color;
 
 #[derive(Display, Debug, Copy, Clone, Eq, PartialEq)]
@@ -127,7 +126,7 @@ impl Board {
     pub fn print(&self, clear_screen: bool) {
         if clear_screen {
             // clear screen and reset cursor to 1-1
-        print!("{}{}", termion::clear::All, termion::cursor::Goto(1, 1));
+            print!("{}{}", termion::clear::All, termion::cursor::Goto(1, 1));
         }
         
         println!("  a b c");
