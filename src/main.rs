@@ -2,14 +2,13 @@
 #[macro_use]
 extern crate enum_display_derive;
 
-use std::char;
+extern crate termion;
+use termion::{color, style};
+
 use std::io::{self, Write};
 
 mod game;
 mod minimax;
-
-//use game::Board;
-//use game::Player;
 
 const PLAYER_USER: game::Player = game::Player::X;
 //const PLAYER_AI: game::Player = game::Player::O;
@@ -20,10 +19,11 @@ fn main() {
     let mut board = game::Board::new(START_PLAYER);
 
     while !board.is_ended() {
-        board.print();
+        board.print(true);
         let next_player = board.next_player();
 
-        println!("Turn: {}", next_player);
+        //println!("Turn: {}", next_player);
+        println!("");
         let mut action;
 
         if next_player == PLAYER_USER {
@@ -67,29 +67,36 @@ fn main() {
 
                 break;
             }
+            
         } else {
 
         	// AI's turn
-        	
         	action = minimax::find_best_move(board, board.next_player);
 
-        	println!(
+        	/*
+            println!(
                 "AI action: {}{}",
                 char::from_u32(action.0 as u32 + '1' as u32).unwrap(),
                 char::from_u32(action.1 as u32 + 'a' as u32).unwrap()
             );
-
+            */
         	
         }
-        board.perform_action(action);
+        board.perform_action(action); // perform human or AI's turn
 		println!();
     }
 
-    if let Some(player) = board.get_winner() {
-        println!("Winner is Player {}", player);
+    println!("{}{}Game Ended{}\n", color::Fg(color::Yellow), style::Bold, style::Reset);
+
+    if let Some(value) = board.get_winner() {
+        println!("Winner is Player {}", value);
     } else {
         println!("Game ended with a draw");
     }
+
+    println!("\nFinal board:\n");
+    board.print(false);
+    println!("\n{}Exiting...{}\n", color::Fg(color::Green), color::Fg(color::Reset));
 
 }
 

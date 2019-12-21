@@ -1,4 +1,7 @@
+
 use std::fmt::{self, Debug, Display};
+
+use termion::color;
 
 #[derive(Display, Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Player {
@@ -57,14 +60,14 @@ impl Board {
 
         for player in &[Player::X, Player::O] {
             // Three in a row: horizontally
-            for row in 0..2 {
+            for row in 0..=2 {
                 if has!(player, row, 0) && has!(player, row, 1) && has!(player, row, 2) {
                     return Some(*player);
                 }
             }
 
             // Three in a row: vertically
-            for col in 0..2 {
+            for col in 0..=2 {
                 if has!(player, 0, col) && has!(player, 1, col) && has!(player, 2, col) {
                     return Some(*player);
                 }
@@ -121,7 +124,12 @@ impl Board {
         actions
     }
 
-    pub fn print(&self) {
+    pub fn print(&self, clear_screen: bool) {
+        if clear_screen {
+            // clear screen and reset cursor to 1-1
+        print!("{}{}", termion::clear::All, termion::cursor::Goto(1, 1));
+        }
+        
         println!("  a b c");
 
         for (i, row) in self.fields.iter().enumerate() {
@@ -129,8 +137,8 @@ impl Board {
 
             for cell in row {
                 match *cell {
-                    Some(Player::X) => print!("x "),
-                    Some(Player::O) => print!("o "),
+                    Some(Player::X) => print!("{}x{} ", color::Fg(color::Green), color::Fg(color::Reset)),
+                    Some(Player::O) => print!("{}o{} ", color::Fg(color::Yellow), color::Fg(color::Reset)),
                     None => print!(". "),
                 };
             }
@@ -275,15 +283,24 @@ mod tests {
 
     #[test]
     fn check_get_winner() {
-        let mut board = Board::new(Player::X);
+        let mut board = Board::new(Player::O);
         board.fields = [
             [None,              Some(Player::X),     Some(Player::O)],
             [Some(Player::X),   Some(Player::X),     Some(Player::X)],
             [Some(Player::O),   Some(Player::O),     None]
         ];
 
-        let manual_winner = Player::X;
-        assert_eq!(board.get_winner().unwrap(), manual_winner); // better to use unwrap_or in code
+        let mut manual_winner = Player::X;
+        assert_eq!(board.get_winner().unwrap(), manual_winner); 
+
+        board.fields = [
+            [None,              None,                None],
+            [None,              None,                None],
+            [Some(Player::O),   Some(Player::O),     Some(Player::O)]
+        ];
+
+        manual_winner = Player::O;
+        assert_eq!(board.get_winner().unwrap(), manual_winner); 
 
     }
     
